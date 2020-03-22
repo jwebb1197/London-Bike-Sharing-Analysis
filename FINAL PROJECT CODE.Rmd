@@ -1,0 +1,1672 @@
+---
+title: "Final Project STA 141A: London Bikesharing"
+author: "Julia Webb, Jesus Leon, Lauren Cordano, Nilay Varshney "
+date: "November 21, 2019"
+output: html_document
+---
+
+##NOTE: EACH SECTION OF THIS R MARKDOWN DOCUMENT IS LABELED WITH "KEY QUESTION:", SO IF YOU SEARCH KEY QUESTION: IN THE WORD SEARCH YOU CAN EASILY NAVIGATE BETWEEN QUESTIONS.
+
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+```
+
+```{r message=FALSE}
+#set working directory
+setwd("C:/Users/jwebb/OneDrive/Desktop/STA 141A/project")
+
+#import data
+setwd("C:/Users/jwebb/OneDrive/Desktop/STA 141A/project")
+library(readr)
+MyData <- read_csv("london_merged.csv")
+MyData <- data.frame(MyData)
+#unique_dates <- c(unique(dates))
+
+```
+
+```{r}
+#making variable for count in a 24 hour period
+attach(MyData)
+dates <- c()
+
+for (i in 1:length(timestamp)){
+    date <- substr(timestamp[i],1,10)
+    dates <- c(dates, date)}
+detach(MyData)
+```
+
+
+```{r}
+#original data with year as a numeric value
+new.data <- cbind(MyData, year= as.numeric(c(substr(MyData$timestamp,1,4)))) 
+```
+
+```{r}
+#making data frames by year
+fifteen <- new.data[new.data$year==2015,]
+sixteen <- new.data[new.data$year==2016,]
+seventeen <- new.data[new.data$year==2017,]
+```
+
+###Making data set of just 2015
+
+```{r}
+unique_dates <- c(unique(dates))
+unique_dates_2015 <- c(unique_dates[substr(unique_dates,1,4) == "2015"])
+```
+
+```{r}
+#total counts per day in 2015
+
+day_counts_15 <- c()
+for (i in 1:length(unique_dates_2015)){
+   cnts_that_day_15 <- c(fifteen$cnt[substr(fifteen$timestamp,1,10) == unique_dates_2015[i]])
+   total_cnts_in_24_hr_period_15 <- sum(cnts_that_day_15)
+   day_counts_15 <- c(day_counts_15, total_cnts_in_24_hr_period_15 )
+}
+```
+
+```{r}
+#average t1 per day; actual temp
+av_t1_per_day_15 <- c()
+for (i in 1:length(unique_dates_2015)){
+   temp_that_day_15 <- c(fifteen$t1[substr(fifteen$timestamp,1,10) == unique_dates_2015[i]])
+   av_t1_in_24_hr_period_15 <- mean(temp_that_day_15)
+   av_t1_per_day_15 <- c(av_t1_per_day_15, av_t1_in_24_hr_period_15)
+}
+```
+
+```{r}
+#average t2 per day; feel like temp: t2
+av_t2_per_day_15 <- c()
+for (i in 1:length(unique_dates_2015)){
+   t2_that_day_15 <- c(fifteen$t2[substr(fifteen$timestamp,1,10) == unique_dates_2015[i]])
+   av_t2_in_24_hr_period_15 <- mean(t2_that_day_15)
+   av_t2_per_day_15 <- c(av_t2_per_day_15, av_t2_in_24_hr_period_15)
+}
+```
+
+```{r}
+t1t2_avs_15 <- (av_t1_per_day_15 + av_t1_per_day_15) #- mean(av_t1_per_day_15 + av_t1_per_day_15)
+```
+
+```{r}
+#average windspeed per day
+av_wind_speed_per_day_15 <- c()
+for (i in 1:length(unique_dates_2015)){
+   wind_that_day_15 <- c(fifteen$wind_speed[substr(fifteen$timestamp,1,10) == unique_dates_2015[i]])
+   av_wind_in_24_hr_period_15 <- mean(wind_that_day_15)
+   av_wind_speed_per_day_15 <- c(av_wind_speed_per_day_15, av_wind_in_24_hr_period_15)
+}
+```
+
+```{r}
+#average humidity 2015
+av_hum_per_day_15 <- c()
+for (i in 1:length(unique_dates_2015)){
+   hum_that_day_15 <- c(fifteen$hum[substr(fifteen$timestamp,1,10) == unique_dates_2015[i]])
+   av_hum_in_24_hr_period_15 <- mean(hum_that_day_15)
+   av_hum_per_day_15 <- c(av_hum_per_day_15, av_hum_in_24_hr_period_15)
+}
+```
+
+```{r}
+wh_15 <- av_wind_speed_per_day_15+ av_hum_per_day_15 #wind and humidity index
+Wind_Hum_Avs_15 =wh_15
+```
+
+```{r}
+av.weather.code <- c()
+for (i in 1:length(unique_dates_2015)){
+   code_that_day <- c(fifteen$weather_code[substr(fifteen$timestamp,1,10) == unique_dates_2015[i]])
+   av_code <- mean(code_that_day)
+   av.weather.code <- c(av.weather.code, av_code)
+}
+```
+
+```{r}
+#holiday, weekend season to days_15
+holiday15 <- c()
+for (i in 1:length(unique_dates_2015)){
+   hol_val15 <- c(fifteen$is_holiday[substr(fifteen$timestamp,1,10) == unique_dates_2015[i]])
+   holiday_val15 <- ifelse(length(unique(hol_val15)) == 1, max(hol_val15), print("problem"))
+   holiday15 <- c(holiday15, holiday_val15)
+}
+```
+
+```{r}
+season15 <- c()
+for (i in 1:length(unique_dates_2015)){
+   seas_val15 <- c(fifteen$season[substr(fifteen$timestamp,1,10) == unique_dates_2015[i]])
+   season_val15 <- ifelse(length(unique(seas_val15)) == 1, max(seas_val15), print("problem"))
+   season15<- c(season15, season_val15)
+}
+```
+
+```{r}
+weekend15 <- c()
+for (i in 1:length(unique_dates_2015)){
+   weekend_vals15 <- c(fifteen$is_weekend[substr(fifteen$timestamp,1,10) == unique_dates_2015[i]])
+   weekend_val15 <- ifelse(length(unique(weekend_vals15)) == 1, max(weekend_vals15), print("problem"))
+   weekend15<- c(weekend15, weekend_val15)
+}
+```
+
+
+```{r}
+#dataframe. calling rides category is day_counts **2, because i ended up squaring the response in the training set
+days_2015 <- data.frame(Rides_sqr = day_counts_15**2,
+  Sum_of_av_t1_t2 = t1t2_avs_15,
+  Wind_Hum_Avs_15)
+```
+
+
+```{r}
+by_day_2015 <- data.frame(unique_dates_2015, day_counts_15, days_2015, holiday15, season15, weekend15)
+
+names(by_day_2015) <- c('Date', 'Rides_per_Day', 'Rides_per_Day_Squared', "Sum_of_av_t1_t2", "sum_of_Av_Wind_Av_Humidity", 'holiday', 'season', 'weekend')
+
+```
+
+
+```{r message=FALSE, warning=FALSE}
+
+ boxplot(by_day_2015$Rides_per_Day,data=by_day_2015)
+ library(ggplot2)
+
+ ggplot(mapping= aes(y=Rides_per_Day), data= by_day_2015)+
+  geom_boxplot() +
+   labs(title = "Boxplot of Rides per Day in 2015", y= "Rides per Day \n")
+ #note the 2 outliers which correspond to obs 187, 215 vals: 72504,63468
+
+
+```
+
+
+
+
+#Making a Dataset of just 2016
+
+```{r}
+
+unique_dates_2016 <- c(unique_dates[substr(unique_dates,1,4) == "2016"])
+```
+
+```{r}
+#total counts per day in 2016
+#first_day_counts <- sixteen$cnt[substr(sixteen$timestamp,1,10) == unique_dates_2016[1]]
+day_counts <- c()
+for (i in 1:length(unique_dates_2016)){
+   cnts_that_day <- c(sixteen$cnt[substr(sixteen$timestamp,1,10) == unique_dates_2016[i]])
+   total_cnts_in_24_hr_persiod <- sum(cnts_that_day)
+   day_counts <- c(day_counts, total_cnts_in_24_hr_persiod )
+}
+#data 2016 witll include: unique_dates_2016, day_counts
+```
+
+
+```{r}
+av_t1_per_day <- c()
+for (i in 1:length(unique_dates_2016)){
+   temp_that_day <- c(sixteen$t1[substr(sixteen$timestamp,1,10) == unique_dates_2016[i]])
+   av_t1_in_24_hr_period <- mean(temp_that_day)
+   av_t1_per_day <- c(av_t1_per_day, av_t1_in_24_hr_period )
+}
+
+```
+
+```{r}
+#feel like temp: t2
+av_t2_per_day <- c()
+for (i in 1:length(unique_dates_2016)){
+   t2_that_day <- c(sixteen$t2[substr(sixteen$timestamp,1,10) == unique_dates_2016[i]])
+   av_t2_in_24_hr_period <- mean(t2_that_day)
+   av_t2_per_day <- c(av_t2_per_day, av_t2_in_24_hr_period )
+}
+```
+
+
+```{r}
+#average humidity 2016: real t1
+av_hum_per_day <- c()
+for (i in 1:length(unique_dates_2016)){
+   hum_that_day <- c(sixteen$hum[substr(sixteen$timestamp,1,10) == unique_dates_2016[i]])
+   av_hum_in_24_hr_period <- mean(hum_that_day)
+   av_hum_per_day <- c(av_hum_per_day, av_hum_in_24_hr_period )
+}
+```
+
+
+```{r}
+#average windspeed per day
+av_wind_speed_per_day <- c()
+for (i in 1:length(unique_dates_2016)){
+   wind_that_day <- c(sixteen$wind_speed[substr(sixteen$timestamp,1,10) == unique_dates_2016[i]])
+   av_wind_in_24_hr_period <- mean(wind_that_day)
+   av_wind_speed_per_day <- c(av_wind_speed_per_day, av_wind_in_24_hr_period )
+}
+```
+
+
+```{r}
+#data table of 2016: date, rides in a 24 hours period, av real temp, av humidity, average wind
+t1t2_avs = av_t2_per_day + av_t1_per_day
+wh <- (av_wind_speed_per_day+av_hum_per_day) #wind and humidity index
+
+days_2016 <- data.frame(
+  Date = unique_dates_2016, 
+  Rides_per_Day_Squared = day_counts**2, #DEPENDENT VAR
+  sum_of_Av_Wind_Av_Humidity =wh, #X2
+  Sum_of_av_t1_t2= t1t2_avs ) #X1
+```
+
+```{r}
+av.weather.code.16 <- c()
+for (i in 1:length(unique_dates_2016)){
+  code_that_day <- c(sixteen$weather_code[substr(sixteen$timestamp,1,10) == unique_dates_2016[i]])
+  av_code <- mean(code_that_day)
+  av.weather.code.16 <- c(av.weather.code.16, av_code)
+}
+```
+
+```{r}
+#holiday, weekend, season to days_2016
+
+holiday <- c()
+for (i in 1:length(unique_dates_2016)){
+   hol_val <- c(sixteen$is_holiday[substr(sixteen$timestamp,1,10) == unique_dates_2016[i]])
+   holiday_val <- ifelse(length(unique(hol_val)) == 1, max(hol_val), print("problem"))
+   holiday <- c(holiday, holiday_val)
+}
+```
+
+```{r}
+season <- c()
+for (i in 1:length(unique_dates_2016)){
+   seas_val <- c(sixteen$season[substr(sixteen$timestamp,1,10) == unique_dates_2016[i]])
+   season_val <- ifelse(length(unique(seas_val)) == 1, max(seas_val), print("problem"))
+   season<- c(season, season_val)
+}
+```
+
+```{r}
+weekend <- c()
+
+for (i in 1:length(unique_dates_2016)){
+   weekend_vals <- c(sixteen$is_weekend[substr(sixteen$timestamp,1,10) == unique_dates_2016[i]])
+   weekend_val <- ifelse(length(unique(weekend_vals)) == 1, max(weekend_vals), print("problem"))
+   weekend<- c(weekend, weekend_val)
+}
+```
+
+```{r}
+days_2016 <- cbind(days_2016, holiday,season,weekend)
+```
+
+
+```{r}
+by_day_2016<- data.frame(unique_dates_2016, day_counts, days_2016)
+```
+
+```{r}
+by_day_2016_new <- data.frame(
+  by_day_2016$unique_dates_2016,
+  by_day_2016$day_counts, 
+  by_day_2016$Rides_per_Day_Squared,
+  by_day_2016$Sum_of_av_t1_t2,
+  by_day_2016$sum_of_Av_Wind_Av_Humidity,
+  by_day_2016$holiday,
+  by_day_2016$season, 
+  by_day_2016$weekend)  
+```
+
+```{r}
+names(by_day_2016_new) <- c('Date', 'Rides_per_Day', 'Rides_per_Day_Squared', "Sum_of_av_t1_t2", "sum_of_Av_Wind_Av_Humidity", 'holiday', 'season', 'weekend')
+```
+
+
+
+
+#Making Dataset of just 2017
+```{r}
+###Making data set of just 2017
+unique_dates <- c(unique(dates))
+unique_dates_2017 <- c(unique_dates[substr(unique_dates,1,4) == "2017"])
+```
+
+```{r}
+#total counts per day in 2017
+
+day_counts_17 <- c()
+for (i in 1:length(unique_dates_2017)){
+  cnts_that_day_17 <- c(seventeen$cnt[substr(seventeen$timestamp,1,10) == unique_dates_2017[i]])
+  total_cnts_in_24_hr_period_17 <- sum(cnts_that_day_17)
+  day_counts_17 <- c(day_counts_17, total_cnts_in_24_hr_period_17 )
+}
+```
+
+```{r}
+#average t1 per day; actual temp
+av_t1_per_day_17 <- c()
+for (i in 1:length(unique_dates_2017)){
+  temp_that_day_17 <- c(seventeen$t1[substr(seventeen$timestamp,1,10) == unique_dates_2017[i]])
+  av_t1_in_24_hr_period_17 <- mean(temp_that_day_17)
+  av_t1_per_day_17 <- c(av_t1_per_day_17, av_t1_in_24_hr_period_17)
+}
+```
+
+```{r}
+#average t2 per day; feel like temp: t2
+av_t2_per_day_17 <- c()
+for (i in 1:length(unique_dates_2017)){
+  t2_that_day_17 <- c(seventeen$t2[substr(seventeen$timestamp,1,10) == unique_dates_2017[i]])
+  av_t2_in_24_hr_period_17 <- mean(t2_that_day_17)
+  av_t2_per_day_17 <- c(av_t2_per_day_17, av_t2_in_24_hr_period_17)
+}
+```
+
+```{r}
+t1t2_avs_17 <- (av_t1_per_day_17 + av_t1_per_day_17) #- mean(av_t1_per_day_17 + av_t1_per_day_17)
+```
+
+```{r}
+#average windspeed per day
+av_wind_speed_per_day_17 <- c()
+for (i in 1:length(unique_dates_2017)){
+  wind_that_day_17 <- c(seventeen$wind_speed[substr(seventeen$timestamp,1,10) == unique_dates_2017[i]])
+  av_wind_in_24_hr_period_17 <- mean(wind_that_day_17)
+  av_wind_speed_per_day_17 <- c(av_wind_speed_per_day_17, av_wind_in_24_hr_period_17)
+}
+```
+
+```{r}
+#average humidity 2017
+av_hum_per_day_17 <- c()
+for (i in 1:length(unique_dates_2017)){
+  hum_that_day_17 <- c(seventeen$hum[substr(seventeen$timestamp,1,10) == unique_dates_2017[i]])
+  av_hum_in_24_hr_period_17 <- mean(hum_that_day_17)
+  av_hum_per_day_17 <- c(av_hum_per_day_17, av_hum_in_24_hr_period_17)
+}
+```
+
+```{r}
+wh_17 <- av_wind_speed_per_day_17+ av_hum_per_day_17 #wind and humidity index
+Wind_Hum_Avs_17 =wh_17
+```
+
+```{r}
+av.weather.code.17 <- c()
+for (i in 1:length(unique_dates_2017)){
+  code_that_day <- c(seventeen$weather_code[substr(seventeen$timestamp,1,10) == unique_dates_2017[i]])
+  av_code <- mean(code_that_day)
+  av.weather.code.17 <- c(av.weather.code.17, av_code)
+}
+```
+
+
+```{r}
+#holiday, weekend, season to days_17
+holiday17 <- c()
+for (i in 1:length(unique_dates_2017)){
+  hol_val17 <- c(seventeen$is_holiday[substr(seventeen$timestamp,1,10) == unique_dates_2017[i]])
+  holiday_val17 <- ifelse(length(unique(hol_val17)) == 1, max(hol_val17), print("problem"))
+  holiday17 <- c(holiday17, holiday_val17)
+}
+```
+
+```{r}
+season17 <- c()
+for (i in 1:length(unique_dates_2017)){
+  seas_val17 <- c(seventeen$season[substr(seventeen$timestamp,1,10) == unique_dates_2017[i]])
+  season_val17 <- ifelse(length(unique(seas_val17)) == 1, max(seas_val17), print("problem"))
+  season17<- c(season17, season_val17)
+}
+```
+
+```{r}
+weekend17 <- c()
+for (i in 1:length(unique_dates_2017)){
+  weekend_vals17 <- c(seventeen$is_weekend[substr(seventeen$timestamp,1,10) == unique_dates_2017[i]])
+  weekend_val17 <- ifelse(length(unique(weekend_vals17)) == 1, max(weekend_vals17), print("problem"))
+  weekend17<- c(weekend17, weekend_val17)
+}
+```
+
+
+```{r}
+#dataframe. calling rides category is day_counts **2, because i ended up squaring the response in the training set
+days_2017 <- data.frame(Rides_sqr = day_counts_17**2,
+                        Sum_of_av_t1_t2 = t1t2_avs_17,
+                        Wind_Hum_Avs_17)
+```
+
+
+```{r}
+by_day_2017 <- data.frame(unique_dates_2017, day_counts_17, days_2017, holiday17, season17, weekend17)
+
+names(by_day_2017) <- c('Date', 'Rides_per_Day', 'Rides_per_Day_Squared', "Sum_of_av_t1_t2", "sum_of_Av_Wind_Av_Humidity", 'holiday', 'season', 'weekend')
+
+```
+
+
+##combining datasets into one data frame -->
+```{r}
+days_2015_2016 <- data.frame(rbind(by_day_2015, by_day_2016_new))
+
+by_day <- rbind(days_2015_2016, by_day_2017)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#KEY QUESTION: INVESTIGATING RELATIONSHIP BETWEEN TOTAL RIDES AND WEEKEND BINARY
+#making confidence intervals for mean  rides on weekend and mean rides on weekdays, plotting results
+
+```{r}
+
+weekend_ride_totals <- by_day$Rides_per_Day[which(by_day$weekend==1)]
+
+weekday_ride_totals <- by_day$Rides_per_Day[which(by_day$weekend==0)]
+
+weekday_ride_totals_no_outliers <- weekday_ride_totals[which(weekday_ride_totals < 50000)]
+
+```
+
+```{r}
+
+#x.bar +/- tstat*(standard dev/sqrt(n))
+#weekend
+n_weekend <- length(weekend_ride_totals)
+
+sd_weekend <- sd(weekend_ride_totals)
+
+n_weekend <- length(weekend_ride_totals)
+
+error_weekend <- qt(0.95, df = n_weekend - 1)*sd_weekend/sqrt(n_weekend)
+
+#weekday
+n_weekday_no_outliers <- length(weekday_ride_totals_no_outliers)
+
+sd_weekday_no_outliers <- sd(weekday_ride_totals_no_outliers)
+
+error_weekday_no_outliers <- qt(0.95, df = n_weekday_no_outliers - 1)*sd_weekday_no_outliers/sqrt(n_weekday_no_outliers)
+
+
+
+#ci
+ci_weekend <- c(mean(weekend_ride_totals)- error_weekend, mean(weekend_ride_totals) + error_weekend)
+
+ci_weekday <- c(mean(weekday_ride_totals_no_outliers)-error_weekday_no_outliers,      mean(weekday_ride_totals_no_outliers)+error_weekday_no_outliers)
+
+```
+
+```{r}
+
+library(ggplot2)
+mns <- c(mean(weekday_ride_totals_no_outliers), mean(weekend_ride_totals))
+class <- c("weekday", "weekend")
+
+
+ci_plot <- ggplot(mapping = aes(x= class, y= mns)) +
+  geom_point(mapping=aes(color=class), size = 4, pch =18) +
+  geom_errorbar(aes(ymin = c(ci_weekday[1], ci_weekend[1]),ymax= c(ci_weekday[2], ci_weekend[2]), color= class),size=.8, width=.3) +
+  labs(x='',y = '\n Mean Rides in a 24 Hour Period',  title= "95% Confidence Intervals for Mean Rides in a day", subtitle='Weekday: [28213.62, 29251.67]\nWeekend: [22136.73, 24348.98]', color = 'Weekday or Weekend')
+
+ci_plot <- ci_plot + theme(plot.subtitle=element_text(size=10))
+ci_plot
+
+```
+
+
+
+#boxplot of rides per day, sorted by weekend
+```{r}
+
+library(ggplot2)
+w = by_day$weekend
+r = by_day$Rides_per_Day
+
+w.boxplots <- ggplot(mapping= aes(x=factor(w), y=r))+
+  geom_boxplot(aes(group=w, fill=factor(w))) +
+  labs(x = '', y = "Total Rides per 24 hr period", title = "Total Rides in a Day: Weekday vs. Weekend", fill = 'Weekend Code', subtitle = "Weekend Code in data set: 0-Weekday 1-Weekend")
+
+w.boxplots + scale_x_discrete(labels=c("0" = "Weekday", "1" = "Weekend")) + scale_fill_discrete(breaks=c("0","1"), labels=c("Weekday", "Weekend"))
+
+
+```
+
+
+```{r}
+kruskal.test(by_day$Rides_per_Day ~ as.factor(by_day$weekend) , data = by_day)
+```
+
+#t.test to see if weekday rides are significantly greater than weekend rides
+```{r}
+
+t.test(x= weekday_ride_totals, y = weekend_ride_totals, alternative = "greater")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#KEY QUESTION: INVESTIGATING RELATIONSHIP BETWEEN TOTAL RIDES AND SEASON CODED VARIABLE
+
+##Boxplots of Rides per day, sorted by season
+
+```{r}
+#didnt use rides because thats squared in this data set
+library(ggplot2)
+s = by_day$season
+r = by_day$Rides_per_Day
+
+season.plot <- ggplot(mapping= aes(x=factor(s), y=r))+
+  geom_boxplot(aes(group=s, fill=factor(s))) +
+  labs(x ="",y = "Total Rides per 24 hr period \n", title = "Total Rides in a day by Season", subtitle = "Season Code in data set: 0-spring ; 1-summer; 2-fall; 3-winter", fill = 'Season')
+
+season.plot + scale_x_discrete(labels=c("Spring","Summer","Fall", "Winter")) + scale_fill_discrete(breaks=c("0","1","2","3"), labels=c("Spring",  "Summer", "Fall", "Winter"))
+
+
+
+```
+
+
+#tests for season code
+```{r}
+kruskal.test(by_day$Rides_per_Day ~ as.factor(by_day$season) , data = by_day)
+```
+
+
+# ```{r}
+# #adding as cols to by_day
+# by_day <- data.frame(by_day, spr, summ, aut, wint)
+# data <- cbind(by_day,summ,wint,aut,spr)
+# season.fit <- aov(by_day$Rides_per_Day ~ by_day$summ + by_day$aut + by_day$wint+ by_day$spr)
+# ```
+
+
+# ```{r}
+#  #summary(season.fit)
+#  anova(season.fit)
+#  season.fit
+# ```
+
+
+
+
+```{r}
+#0-spring ; 1-summer; 2-fall; 3-winter.
+spring_ride_totals <- by_day$Rides_per_Day[which(by_day$season == 0)]
+summer_ride_totals <- by_day$Rides_per_Day[which(by_day$season == 1)]
+fall_ride_totals <- by_day$Rides_per_Day[which(by_day$season == 2)]
+winter_ride_totals <- by_day$Rides_per_Day[which(by_day$season ==3)]
+```
+
+
+
+```{r}
+#show that average summer is greater than average fall
+t.test(x=summer_ride_totals,y=fall_ride_totals,alternative="greater")
+```
+
+```{r}
+#show that average fall is greater than average spring
+t.test(x=fall_ride_totals,y=spring_ride_totals,alternative="greater")
+```
+
+```{r}
+t.test(x=spring_ride_totals,y=winter_ride_totals,alternative="greater")
+```
+
+
+```{r}
+kruskal.test(by_day$Rides_per_Day ~ as.factor(by_day$holiday) , data = by_day)
+```
+
+
+
+
+
+
+
+```{r}
+# attach(data)
+# Summer <- data.frame(rbind(data[season==1,]))
+# Fall <- data.frame(rbind(data[season==2,]))
+# Winter <- data.frame(rbind(data[season==3,]))
+# Spring <- data.frame(rbind(data[season==0,]))
+#
+# # ride.counts(Summer)
+# # ride.counts(Fall)
+# # ride.counts(Winter)
+# # ride.counts(Spring)
+# detach(data)
+```
+
+```{r}
+#making categories of season binaries
+#0-spring ; 1-summer; 2-fall; 3-winter.
+#val =2
+spr <- c()
+for (i in by_day$season){
+  if(i==0) val=1 else val=0
+  spr <- c(spr,val)
+}
+
+summ <- c()
+for (i in by_day$season){
+  if(i==1) val=1 else val=0
+  summ <- c(summ,val)
+}
+
+aut <- c()
+for (i in by_day$season){
+  if(i==2) val= 1 else val=0
+  aut <- c(aut,val)
+}
+
+wint <- c()
+for (i in by_day$season){
+  if(i==3) val=1 else val=0
+  wint <- c(wint,val)
+}
+```
+
+```{r}
+#adding as cols to by_day
+by_day <- data.frame(by_day, spr, summ, aut, wint)
+data <- cbind(by_day,summ,wint,aut,spr)
+season.fit <- aov(by_day$Rides_per_Day ~ by_day$summ + by_day$aut + by_day$wint + by_day$spr)
+#summary(season.fit)
+anova(season.fit)
+
+#season.fit
+```
+
+```{r}
+
+data <- cbind(data,summ,wint,aut,spr)
+season.fit <- aov(data$cnt ~ data$summ + data$aut + data$wint+data$spr)
+#summary(season.fit)
+anova(season.fit)
+# t.test(cnt ~ summ)
+# t.test(cnt ~ aut)
+# t.test(cnt ~ wint)
+# t.test(cnt ~ spr)
+#
+# t.test(cnt ~ is_holiday, data=data)
+# t.test(cnt ~ is_weekend, data=data)
+season.fit
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##KEY QUESTION: RELATIONSHIP BETWEEN RESPONSE AND CONTINUOUS VARIABLES, ALSO DECIDED TO INCLUDE WKND AND HOLIDAY BINARY IN THE MODEL
+#FITTING A LINEAR REGRESSION TO THE DATASET
+```{r}
+av_fit <- lm(Rides_per_Day ~  Sum_of_av_t1_t2 + sum_of_Av_Wind_Av_Humidity  + weekend + holiday, data = by_day)
+#to include or not to include predictors?
+summary(av_fit)
+```
+
+```{r}
+by_day_filtered <- by_day[-c(187,215,721), ]
+av_fit.filter <- lm(Rides_per_Day ~  Sum_of_av_t1_t2 + sum_of_Av_Wind_Av_Humidity  + weekend + holiday, data = by_day_filtered)
+
+summary(av_fit.filter)
+```
+
+```{r}
+plot(by_day[c(2,4:5)])
+```
+
+```{r}
+cor(by_day[c(4:6,8)])
+car::vif(av_fit)
+```
+
+```{r}
+#plotting residuals
+par(mfrow=c(2,2))
+plot(av_fit)
+```
+
+
+
+
+#TAKING A RANDOM SAMPLE OF 300 OBSERVATIONS (REPLACE = FALSE), AND USING SAME MODEL ON THAT DATASET
+
+
+
+#taking a random sample, checking that random sample is normally distributed
+```{r}
+l <- length(by_day[,1])
+obs_sample <- sample(1:727,300,replace=FALSE)
+obs_sample_indexes <- sample(1:727,300,replace=FALSE)
+
+random_sample <- data.frame( Rides_per_Day = by_day$Rides_per_Day[obs_sample_indexes], Rides_per_Day_Squared = by_day$Rides_per_Day_Squared[obs_sample_indexes], Sum_of_av_t1_t2 = by_day$Sum_of_av_t1_t2[obs_sample_indexes], sum_of_Av_Wind_Av_Humidity = by_day$sum_of_Av_Wind_Av_Humidity[obs_sample_indexes], holiday = by_day$holiday[obs_sample_indexes], season = by_day$season[obs_sample_indexes], weekend=by_day$weekend[obs_sample_indexes])
+
+par(mfrow=c(1,2))
+
+qqnorm(random_sample$Rides_per_Day)
+qqline(random_sample$Rides_per_Day, col="red")
+hist(random_sample$Rides_per_Day, main = "Rides per Day Random Sample")
+```
+
+
+##Fitting a linear regression from the random sample
+```{r}
+#by_day_shuffle <- #sample(by_day, size= length(by_day[,1]), replace = FALSE)
+  av_fit.sample <- lm(Rides_per_Day ~  Sum_of_av_t1_t2 + sum_of_Av_Wind_Av_Humidity + weekend + holiday, data = random_sample)
+#to include or not to include predictors?
+summary(av_fit.sample)
+```
+
+```{r}
+plot(by_day[c(2,4:5)])
+```
+
+```{r}
+cor(by_day[c(2,4:5)])
+```
+
+```{r}
+#plotting residuals
+par(mfrow=c(2,2))
+plot(av_fit)
+```
+
+```{r}
+#testing normality of parameters we used for t-tests, althought by central limit theorem we are okay to use t-test
+# qqnorm(fall_ride_totals)
+# qqnorm(summer_ride_totals)
+# qqnorm(spring_ride_totals)
+# qqnorm(winter_ride_totals)
+# qqnorm(holiday_ride_totals)
+# qqnorm(non.holiday_ride_totals)
+# qqnorm(clear)
+# qqnorm(few.clouds)
+# qqnorm(partly.cloudy)
+# qqnorm(rain)
+# qqnorm(snow)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#KEY QUESTION: INVESTIGATING WHAT TIME OF DAY SHOWED HIGHEST RIDERSHIP, SPLITTING BETWEEN WEEKDAYS AND WEEKENDS
+
+```{r}
+library(readr)
+data <- read_csv("london_merged.csv")
+data = data.frame(data)
+
+library(dplyr)
+```
+
+```{r}
+#a function to give a total rides
+ride.counts <- function(X){
+  total = sum(X$cnt)
+  avg = mean(X$cnt)
+  return(c(total, avg))
+}
+```
+
+```{r}
+times <- as.numeric(substr(data$timestamp,12,13))
+data<-cbind(data,times)
+```
+
+
+```{r}
+attach(data)
+#making data frames based off times of day code...weekdays
+morning.weekday <- data[which(times==7 & is_weekend==0 & is_holiday==0|times==8 & is_weekend==0 & is_holiday==0|times==9 & is_weekend==0 & is_holiday==0|times==10 & is_weekend==0 & is_holiday==0) ,]
+morning.weekday <- morning.weekday[which(substr(morning.weekday$timestamp,1,4) != "2017"),]
+
+afternoon.weekday <- data[which(times==11 & is_weekend==0 & is_holiday==0|times==12 & is_weekend==0 & is_holiday==0|times==13 & is_weekend==0 & is_holiday==0|times==14 & is_weekend==0 & is_holiday==0),]
+afternoon.weekday <- afternoon.weekday[which(substr(afternoon.weekday$timestamp,1,4) != "2017"),]
+
+evening.weekday <- data[which(times==15 & is_weekend==0 & is_holiday==0|times==16 & is_weekend==0 & is_holiday==0|times==17 & is_weekend==0 & is_holiday==0|times==18 & is_weekend==0 & is_holiday==0),]
+evening.weekday <- evening.weekday[which(substr(evening.weekday$timestamp,1,4) != "2017"),]
+
+night.weekday <-data[which(times==19 & is_weekend==0 & is_holiday==0| times==20 & is_weekend==0 & is_holiday==0|times==21 & is_weekend==0 & is_holiday==0|times==22 & is_weekend==0 & is_holiday==0),]
+night.weekday <- night.weekday[which(substr(night.weekday$timestamp,1,4) != "2017"),]
+
+
+
+
+#making data frames based off times of day code...weekends
+morn.weekend <- data.frame(rbind(data[times==7 & is_weekend==1 & is_holiday==0|times==8 & is_weekend==1 & is_holiday==0|times==9 & is_weekend==1 & is_holiday==0|times==10 & is_weekend==1 & is_holiday==0,]))
+morn.weekend <- morn.weekend[which(substr(morn.weekend$timestamp,1,4) != "2017"),]
+
+afternoon.weekend <- data.frame(rbind(data[times==11 & is_weekend==1 & is_holiday==0|times==12 & is_weekend==1 & is_holiday==0|times==13 & is_weekend==1 & is_holiday==0|times==14 & is_weekend==1 & is_holiday==0,]))
+afternoon.weekend <- afternoon.weekend[which(substr(afternoon.weekend$timestamp,1,4) != "2017"),]
+
+evening.weekend <- data.frame(rbind(data[times==15 & is_weekend==1 & is_holiday==0|times==16 & is_weekend==1 & is_holiday==0|times==17 & is_weekend==1 & is_holiday==0|times==18 & is_weekend==1 & is_holiday==0,]))
+evening.weekend <- evening.weekend[which(substr(evening.weekend$timestamp,1,4) != "2017"),]
+
+night.weekend <- data.frame(rbind(data[times==19 & is_weekend==1 & is_holiday==0|times==20 & is_weekend==1 & is_holiday==0|times==21 & is_weekend==1 & is_holiday==0|times==22 & is_weekend==1 & is_holiday==0,]))
+night.weekend <- night.weekend[which(substr(night.weekend$timestamp,1,4) != "2017"),]
+
+
+detach(data)
+```
+
+#compress data frames so that they are by day
+
+```{r}
+# make new data frames based on times of day
+# to compare rides on weekdays vs. weekends; top half of dataset is weekday, bottom half is weekends
+
+df.morning <- data.frame(rbind(morning.weekday, morn.weekend))
+df.afternoon <- data.frame(rbind(afternoon.weekday, afternoon.weekend))
+df.evening <- data.frame(rbind(evening.weekday, evening.weekend))
+df.night <- data.frame(rbind(night.weekday, night.weekend))
+```
+
+
+
+`
+
+```{r}
+
+ride.counts(morning)
+ride.counts(afternoon)
+ride.counts(evening)
+ride.counts(night)
+```
+
+
+# make new data frames based on times of day
+# to compare rides on weekdays vs. weekends
+```{r}
+df.morning <- data.frame(rbind(morning, morn.weekend))
+df.afternoon <- data.frame(rbind(afternoon, afternoon.weekend))
+df.evening <- data.frame(rbind(evening, evening.weekend))
+df.night <- data.frame(rbind(night, night.weekend))
+```
+
+```{r}
+ride.counts <- function(X){
+  total = sum(X$cnt)
+  avg = mean(X$cnt)
+  return(c(total, avg))
+}
+ride.counts(morning.weekday)
+ride.counts(afternoon.weekday)
+ride.counts(evening.weekday)
+ride.counts(night.weekday)
+
+ride.counts(morn.weekend)
+ride.counts(afternoon.weekend)
+ride.counts(evening.weekend)
+ride.counts(night.weekend)
+
+# make new data frames based on time of day
+# to compare rides on weekdays vs. weekends
+df.morning <- data.frame(rbind(morning, morn.weekend))
+df.afternoon <- data.frame(rbind(afternoon, afternoon.weekend))
+df.evening <- data.frame(rbind(evening, evening.weekend))
+df.night <- data.frame(rbind(night, night.weekend))
+
+t.test(cnt ~ is_weekend, data=df.morning)
+morning.fit <- lm(cnt ~ is_weekend, data=df.morning)
+anova(morning.fit)
+t.test(cnt ~ is_weekend, data=df.afternoon)
+afternoon.fit <- lm(cnt ~ is_weekend, data=df.afternoon)
+anova(afternoon.fit)
+t.test(cnt ~ is_weekend, data=df.evening)
+evening.fit <- lm(cnt ~ is_weekend, data=df.evening)
+anova(evening.fit)
+t.test(cnt ~ is_weekend, data=df.night)
+night.fit <- lm(cnt ~ is_weekend, data=df.night)
+anova(night.fit)
+
+
+holidays <- data.frame(rbind(data[is_holiday==1,]))
+ride.counts(holidays)
+
+
+Summer <- data.frame(rbind(data[season==1,]))
+Fall <- data.frame(rbind(data[season==2,]))
+Winter <- data.frame(rbind(data[season==3,]))
+Spring <- data.frame(rbind(data[season==0,]))
+
+ride.counts(Summer)
+ride.counts(Fall)
+ride.counts(Winter)
+ride.counts(Spring)
+
+season.fit <- lm(cnt ~ summ + aut + wint)
+summary(season.fit)
+anova(season.fit)
+t.test(cnt ~ summ)
+t.test(cnt ~ aut)
+t.test(cnt ~ wint)
+t.test(cnt ~ spr)
+
+t.test(cnt ~ is_holiday, data=data)
+t.test(cnt ~ is_weekend, data=data)
+
+```
+
+
+
+<!-- ```{r} -->
+<!-- #vectors of ride per morning on weekday, afternoon on a weekday, evening on a weekday, night on a weekday -->
+<!-- #MORNING -->
+
+<!-- morning.weekday.dates <- c() -->
+
+<!-- for (i in 1:length(morning.weekday$timestamp)){ -->
+<!--     morning.weekday.date <- substr(morning.weekday$timestamp[i],1,10) -->
+<!--     morning.weekday.dates <- c(morning.weekday.dates, morning.weekday.date)} -->
+
+<!-- unique.morning.weekday.dates <- c(unique(morning.weekday.dates)) -->
+
+<!-- #make a vector of rides of morning weekday, per day -->
+<!-- r.m.wkdy <- c() -->
+<!-- for (i in 1:length(unique.morning.weekday.dates)){ -->
+
+<!--    cnts_that_day <- c(morning.weekday$cnt[substr(morning.weekday$timestamp,1,10) == unique.morning.weekday.dates[i]]) -->
+<!--    total_cnts_in_24_hr_period<- sum(cnts_that_day) -->
+<!--    r.m.wkdy <- c(r.m.wkdy, total_cnts_in_24_hr_period) -->
+<!-- } -->
+
+<!-- #AFTERNOON -->
+
+<!-- afternoon.weekday.dates <- c() -->
+
+<!-- for (i in 1:length(afternoon.weekday$timestamp)){ -->
+<!--     afternoon.weekday.date <- substr(afternoon.weekday$timestamp[i],1,10) -->
+<!--     afternoon.weekday.dates <- c(afternoon.weekday.dates, afternoon.weekday.date)} -->
+
+<!-- unique.afternoon.weekday.dates <- c(unique(afternoon.weekday.dates)) -->
+
+<!-- #make a vector of rides of afternoon weekday, per day -->
+<!-- r.af.wkdy <- c() -->
+<!-- for (i in 1:length(unique.afternoon.weekday.dates)){ -->
+
+<!--    cnts_that_day <- c(afternoon.weekday$cnt[substr(afternoon.weekday$timestamp,1,10) == unique.afternoon.weekday.dates[i]]) -->
+<!--    total_cnts_in_24_hr_period<- sum(cnts_that_day) -->
+<!--    r.af.wkdy <- c(r.af.wkdy, total_cnts_in_24_hr_period) -->
+<!-- } -->
+
+<!-- #EVENING -->
+
+<!-- evening.weekday.dates <- c() -->
+
+<!-- for (i in 1:length(evening.weekday$timestamp)){ -->
+<!--     evening.weekday.date <- substr(evening.weekday$timestamp[i],1,10) -->
+<!--     evening.weekday.dates <- c(evening.weekday.dates, evening.weekday.date)} -->
+
+<!-- unique.evening.weekday.dates <- c(unique(evening.weekday.dates)) -->
+
+<!-- #make a vector of rides of evening weekday, per day -->
+<!-- r.ev.wkdy <- c() -->
+<!-- for (i in 1:length(unique.evening.weekday.dates)){ -->
+
+<!--    cnts_that_day <- c(evening.weekday$cnt[substr(evening.weekday$timestamp,1,10) == unique.evening.weekday.dates[i]]) -->
+<!--    total_cnts_in_24_hr_period<- sum(cnts_that_day) -->
+<!--    r.ev.wkdy <- c(r.ev.wkdy, total_cnts_in_24_hr_period) -->
+<!-- } -->
+
+<!-- #NIGHT -->
+
+<!-- night.weekday.dates <- c() -->
+
+<!-- for (i in 1:length(night.weekday$timestamp)){ -->
+<!--     night.weekday.date <- substr(night.weekday$timestamp[i],1,10) -->
+<!--     night.weekday.dates <- c(night.weekday.dates, night.weekday.date)} -->
+
+<!-- unique.night.weekday.dates <- c(unique(night.weekday.dates)) -->
+
+<!-- #make a vector of rides of night weekday, per day -->
+<!-- r.n.wkdy <- c() -->
+<!-- for (i in 1:length(unique.night.weekday.dates)){ -->
+
+<!--    cnts_that_day <- c(night.weekday$cnt[substr(night.weekday$timestamp,1,10) == unique.night.weekday.dates[i]]) -->
+<!--    total_cnts_in_24_hr_period<- sum(cnts_that_day) -->
+<!--    r.n.wkdy <- c(r.n.wkdy, total_cnts_in_24_hr_period) -->
+<!-- } -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+
+<!-- #vectors of ride per morning on weekend, afternoon on a weekend, evening on a weekend, night on a weekend -->
+<!-- #MORNING -->
+
+<!-- morning.weekend.dates <- c() -->
+
+<!-- for (i in 1:length(morn.weekend$timestamp)){ -->
+<!--     morning.weekend.date <- substr(morn.weekend$timestamp[i],1,10) -->
+<!--     morning.weekend.dates <- c(morning.weekend.dates, morning.weekend.date)} -->
+
+<!-- unique.morning.weekend.dates <- c(unique(morning.weekend.dates)) -->
+
+<!-- #make a vector of rides of morning weekend, per day -->
+<!-- r.m.wknd <- c() -->
+<!-- for (i in 1:length(unique.morning.weekend.dates)){ -->
+
+<!--    cnts_that_day <- c(morn.weekend$cnt[substr(morn.weekend$timestamp,1,10) == unique.morning.weekend.dates[i]]) -->
+<!--    total_cnts_in_24_hr_period<- sum(cnts_that_day) -->
+<!--    r.m.wknd <- c(r.m.wknd, total_cnts_in_24_hr_period) -->
+<!-- } -->
+
+<!-- #AFTERNOON -->
+
+<!-- afternoon.weekend.dates <- c() -->
+
+<!-- for (i in 1:length(afternoon.weekend$timestamp)){ -->
+<!--     afternoon.weekend.date <- substr(afternoon.weekend$timestamp[i],1,10) -->
+<!--     afternoon.weekend.dates <- c(afternoon.weekend.dates, afternoon.weekend.date)} -->
+
+<!-- unique.afternoon.weekend.dates <- c(unique(afternoon.weekend.dates)) -->
+
+<!-- #make a vector of rides of afternoon weekend, per day -->
+<!-- r.af.wknd <- c() -->
+<!-- for (i in 1:length(unique.afternoon.weekend.dates)){ -->
+
+<!--    cnts_that_day <- c(afternoon.weekend$cnt[substr(afternoon.weekend$timestamp,1,10) == unique.afternoon.weekend.dates[i]]) -->
+<!--    total_cnts_in_24_hr_period<- sum(cnts_that_day) -->
+<!--    r.af.wknd <- c(r.af.wknd, total_cnts_in_24_hr_period) -->
+<!-- } -->
+
+<!-- #EVENING -->
+
+<!-- evening.weekend.dates <- c() -->
+
+<!-- for (i in 1:length(evening.weekend$timestamp)){ -->
+<!--     evening.weekend.date <- substr(evening.weekend$timestamp[i],1,10) -->
+<!--     evening.weekend.dates <- c(evening.weekend.dates, evening.weekend.date)} -->
+
+<!-- unique.evening.weekend.dates <- c(unique(evening.weekend.dates)) -->
+
+<!-- #make a vector of rides of evening weekend, per day -->
+<!-- r.ev.wknd <- c() -->
+<!-- for (i in 1:length(unique.evening.weekend.dates)){ -->
+
+<!--    cnts_that_day <- c(evening.weekend$cnt[substr(evening.weekend$timestamp,1,10) == unique.evening.weekend.dates[i]]) -->
+<!--    total_cnts_in_24_hr_period<- sum(cnts_that_day) -->
+<!--    r.ev.wknd <- c(r.ev.wknd, total_cnts_in_24_hr_period) -->
+<!-- } -->
+
+<!-- #NIGHT -->
+
+<!-- night.weekend.dates <- c() -->
+
+<!-- for (i in 1:length(night.weekend$timestamp)){ -->
+<!--     night.weekend.date <- substr(night.weekend$timestamp[i],1,10) -->
+<!--     night.weekend.dates <- c(night.weekend.dates, night.weekend.date)} -->
+
+<!-- unique.night.weekend.dates <- c(unique(night.weekend.dates)) -->
+
+<!-- #make a vector of rides of night weekend, per day -->
+<!-- r.n.wknd <- c() -->
+<!-- for (i in 1:length(unique.night.weekend.dates)){ -->
+
+<!--    cnts_that_day <- c(night.weekend$cnt[substr(night.weekend$timestamp,1,10) == unique.night.weekend.dates[i]]) -->
+<!--    total_cnts_in_24_hr_period<- sum(cnts_that_day) -->
+<!--    r.n.wknd <- c(r.n.wknd, total_cnts_in_24_hr_period) -->
+<!-- } -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- #weekend: afternoon and evening -->
+<!-- t.test(x= r.ev.wknd, y=r.m.wknd, "greater") -->
+<!-- t.test(x=r.ev.wknd, y=r.af.wknd, "greater") #ev less than afternoon -->
+<!-- t.test(x=r.ev.wknd, y=r.n.wknd, "greater") -->
+
+<!-- t.test(x= r.af.wknd, y=r.m.wknd, "greater") -->
+<!-- t.test(x=r.af.wknd, y=r.ev.wknd, "greater") #ev less than afternoon -->
+<!-- t.test(x=r.af.wknd, y=r.n.wknd, "greater") -->
+
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- #evening is greatest on weekdays -->
+<!-- t.test(x= r.ev.wkdy, y=r.m.wkdy, "greater") -->
+<!-- t.test(x=r.ev.wkdy, y=r.af.wkdy, "greater") -->
+<!-- t.test(x=r.ev.wkdy, y=r.n.wkdy, "greater") -->
+
+<!-- t.test(x= r.m.wkdy, y=r.af.wkdy, "greater") -->
+<!-- t.test(x=r.m.wkdy, y=r.ev.wkdy, "greater") -->
+<!-- t.test(x=r.m.wkdy, y=r.n.wkdy, "greater") -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- #testing normality of vectors ran t tests on, even thought Central Limit Theorem applies -->
+<!-- qnorm(r.ev.wknd) -->
+<!-- qqnorm(r.m.wknd) -->
+<!-- qqnorm(r.af.wknd) -->
+<!-- qqnorm(r.n.wknd) -->
+<!-- qqnorm(r.ev.wkdy) -->
+<!-- qqnorm(r.m.wkdy) -->
+<!-- qqnorm(r.n.wkdy) -->
+<!-- qqnorm(r.af.wkdy) -->
+<!-- ``` -->
+
+#BOXPLOTS OF RESULTS
+
+
+
+
+```{r}
+attach(data)
+library(ggplot2)
+
+ggplot(data=data, aes(x=as.factor(times), y=cnt)) +
+  geom_boxplot(aes(fill = as.factor(is_holiday))) + theme(legend.position=c(.1,.8)) +
+  labs(title="Rides by Hour and Type of Day (Holiday vs. Not Holiday)",x="Hour", y = "Count") +
+  scale_fill_discrete(name = "Type of Day", labels = c("not Holiday", "Holiday"))
+detach(data)
+```
+
+```{r}
+attach(data)
+ggplot(data=data, aes(x=as.factor(is_holiday), y=cnt)) +
+  geom_boxplot(outlier.color = "red") + stat_summary(fun.y=mean, geom="point", shape=23, size=4) +
+  labs(title="Rides On Holidays",x="If Holiday", y = "Count") + scale_x_discrete(labels=c("Holiday", "non-Holiday"))
+detach(data)
+```
+
+```{r}
+attach(data)
+ggplot(data=data, aes(x=as.factor(season), y=cnt)) +
+  geom_boxplot(outlier.color = "red") + stat_summary(fun.y=mean, geom="point", shape=23, size=4) +
+  labs(title="Rides by Season",x="Season", y = "Count") + theme(legend.position=c(.1,.8)) +
+  scale_x_discrete(labels=c("spring","summer","autumn","winter"))
+detach(data)
+```
+
+```{r}
+attach(data)
+ggplot(data=data, aes(x=as.factor(weather_code), y=cnt)) +
+  geom_boxplot(outlier.color = "red") + stat_summary(fun.y=mean, geom="point", shape=23, size=4) +
+  labs(title="Rides by Weather Code",x="Weather Code", y = "Count") + theme(legend.position=c(.9,1)) +
+  scale_x_discrete(labels=c("clear","few clouds","partly cloudy","cloudy","rain","thunderstorm","snow"))
+detach(data)
+```
+
+```{r}
+attach(data)
+ggplot(data=data, aes(x=as.factor(times), y=cnt)) +
+  geom_boxplot(aes(fill = as.factor(is_weekend))) + theme(legend.position=c(.1,.8)) +
+  labs(title="Rides by Hour and Type of Day (Week day vs. Weekend)",x="Hour", y = "Count") +
+  scale_fill_discrete(name = "Type of Day", labels = c("week day", "weekend"))
+detach(data)
+```
+
+```{r}
+attach(data)
+ggplot(data=Summer, aes(x=as.factor(times), y=cnt)) +
+  geom_boxplot(aes(fill = as.factor(is_weekend))) + theme(legend.position=c(.1,.8)) +
+  labs(title="Rides by Hour and Type of Day in the Summer",x="Hour", y = "Count") +
+  scale_fill_discrete(name = "Type of Day", labels = c("week day", "weekend"))
+detach(data)
+```
+
+```{r}
+attach(data)
+ggplot(data=Fall, aes(x=as.factor(times), y=cnt)) +
+  geom_boxplot(aes(fill = as.factor(is_weekend))) + theme(legend.position=c(.1,.8)) +
+  labs(title="Rides by Hour and Type of Day in the Fall",x="Hour", y = "Count") +
+  scale_fill_discrete(name = "Type of Day", labels = c("week day", "weekend"))
+detach(data)
+```
+
+```{r}
+attach(data)
+ggplot(data=Winter, aes(x=as.factor(times), y=cnt)) +
+  geom_boxplot(aes(fill = as.factor(is_weekend))) + theme(legend.position=c(.1,.8)) +
+  labs(title="Rides by Hour and Type of Day in the Winter",x="Hour", y = "Count") +
+  scale_fill_discrete(name = "Type of Day", labels = c("week day", "weekend"))
+detach(data)
+```
+
+```{r}
+attach(data)
+ggplot(data=Spring, aes(x=as.factor(times), y=cnt)) +
+  geom_boxplot(aes(fill = as.factor(is_weekend))) + theme(legend.position=c(.1,.8)) +
+  labs(title="Rides by Hour and Type of Day in the Spring",x="Hour", y = "Count") +
+  scale_fill_discrete(name = "Type of Day", labels = c("week day", "weekend"))
+detach(data)
+```
+
+
+```{r}
+data <- read.csv('london_merged.csv')
+```
+
+
+
+
+
+
+
+# KEY QUESTION: Association between Holiday and Bike Rides
+
+This section will determine if there is an association between holidays and number of bike rides per day.
+
+## Data Preparation
+
+First, the data for this section must be prepared.
+```{r, message = FALSE}
+library(dplyr)
+data_holiday <- data[c(1, 2, 8)]
+data_holiday$day <- substr(data_holiday$timestamp, 1, 10)
+data_holiday <- summarise_at(group_by(data_holiday, day), vars(cnt, is_holiday),
+                             list(~sum(.)))
+data_holiday$is_holiday <- as.factor(data_holiday$is_holiday)
+levels(data_holiday$is_holiday) <- c('not a holiday', 'holiday')
+data_holiday$day <- NULL
+```
+
+## Data Visualization
+
+Next, the distribution of bike rides per day for holidays and non-holidays will be visualized using boxplots.
+```{r, message = FALSE}
+library(ggplot2)
+ggplot(data_holiday, aes(x = is_holiday, y = cnt)) + geom_boxplot() +
+  ggtitle('Number of Bike Rides per Day for Holidays vs Non-Holidays') +
+  xlab('Type of Day') + ylab('Bike Rides per Day')
+```
+
+Based on the two boxplots, there appears to be a significant difference in the number of bike rides per day for holidays and non-holidays. Nonetheless, a two sample t-test will be used to confirm or dispute this difference.
+
+## Assumption of Normality
+
+First, the assumption of normality must be checked.
+```{r, message = FALSE}
+print(paste('Number of holiday observations:',
+            length(which(data_holiday$is_holiday == 'holiday'))))
+print(paste('Number of non-holiday observations:',
+            length(which(data_holiday$is_holiday == 'not a holiday'))))
+```
+The sample corresponding to non-holidays has a size larger than 40, so it is unnecessary to check the normality of that sample. However, the sample corresponding to holidays needs to be examined further.
+
+### Checking Normality of Holiday Observations
+
+To determine whether or not the sample corresponding to holidays is normally distributed, the sample will be visualized with a histogram, and a Shapiro-Wilk test will be conducted.
+```{r, message = FALSE}
+data_yes_hol <- data_holiday[(data_holiday$is_holiday == 'holiday'),]
+ggplot(data_yes_hol, aes(cnt)) + geom_histogram(breaks = seq(5000, 35000, 5000)) +
+  xlab('Number of Bike Rides per Day') + ylab('Number of Days') +
+  ggtitle('Number of Bike Rides per Day for Each Holiday')
+```
+
+The histogram does not suggest that the sample is strongly nonnormal.
+```{r, message = FALSE}
+shapiro.test(data_yes_hol$cnt)
+```
+The p-value resulting from the Shapiro-Wilk test is higher than the significance level of 0.01, which means that the sample of observations corresponding to holidays is not significantly nonnormal. Therefore, it can be assumed that the sample is normally distributed. Thus, the assumption of normality has been satisfied.
+
+## Equal Variances
+
+Next, the assumption of equal variance will be checked using an F-test. If the resulting p-value has a value less than 0.01, then the null hypothesis of equal variances must be rejected.
+```{r, message = FALSE}
+var.test(data_holiday$cnt[data_holiday$is_holiday == 'not a holiday'],
+         data_holiday$cnt[data_holiday$is_holiday == 'holiday'])
+```
+Since the resulting p-value is quite high, the sample variances of the two samples are not significantly different from each other. Therefore, the assumption of equal variance has been met. As a result, the two-sample Student's t-test will be used.
+
+## Student's t-test
+
+Now, the two sample t-test will be conducted. If the resulting p-value has a value of less than 0.01, that means that the mean number of bike rides for the holiday hours and the non-holiday hours are significantly different from each other, which means that there is an association between holidays and number of bike rides per hour.
+```{r, message = FALSE}
+t.test(cnt ~ is_holiday, data = data_holiday, var.equal = TRUE)
+```
+Since the p-value is quite low, that means that the difference between the mean number of bike rides for holiday hours and non-holiday hours is significantly different from each other. Therefore, there is indeed an association between holidays and number of bike rides per hour.
+
+
+
+
+
+
+
+
+
+
+
+# KEY QUESTION: Association between Weather and Bike Rides
+
+This section will determine if there is an association between the weather and the number of bike rides per hour.
+
+## Data Preparation
+
+First, the data for this section must be prepared.
+```{r, message = FALSE}
+data_weather <- data[c(2, 7)]
+data_weather$weather_code <- as.factor(data_weather$weather_code)
+levels(data_weather$weather_code) <- c('clear', 'scattered clouds', 'broken clouds',
+                                       'cloudy', 'rain', 'thunderstorm', 'snowfall')
+```
+
+## Data Visualization
+
+Next, the distribution of bike rides per hour for each type of weather will be visualized using boxplots.
+```{r, message = FALSE}
+ggplot(data_weather, aes(x = weather_code, y = cnt)) + geom_boxplot() +
+  ggtitle('Number of Bike Rides per Hour for Each Type of Weather') +
+  xlab('Type of Weather') + ylab('Bike Rides per Hour')
+```
+
+Based on the boxplots, there appears to be a significant association between the number of bike rides per hour and the type of weather. Nonetheless, an ANOVA F-test will be used to confirm or dispute this association.
+
+## Assumption of Normality
+
+First, the assumption of normality must be checked.
+```{r, message = FALSE}
+print(paste('Number of observations for clear hours:',
+            length(which(data_weather$weather_code == 'clear'))))
+print(paste('Number of observations for hours with scattered clouds:',
+            length(which(data_weather$weather_code == 'scattered clouds'))))
+print(paste('Number of observations for hours with broken clouds:',
+            length(which(data_weather$weather_code == 'broken clouds'))))
+print(paste('Number of observations for cloudy hours:',
+            length(which(data_weather$weather_code == 'cloudy'))))
+print(paste('Number of observations for rainy hours:',
+            length(which(data_weather$weather_code == 'rain'))))
+print(paste('Number of observations for hours with thunderstorms:',
+            length(which(data_weather$weather_code == 'thunderstorm'))))
+print(paste('Number of observations for hours with snowfall:',
+            length(which(data_weather$weather_code == 'snowfall'))))
+```
+All samples, other than the one correpsonding to thunderstorms, have sizes larger than 40, so once it is checked that the sample corresponding to thunderstorms is normally distributed, the assumption of normality will be satisfied.
+
+### Checking Normality of Thunderstorm Observations
+
+To determine whether or not the sample corresponding to thunderstorms is normally distributed, the sample will be visualized with a histogram, and a Shapiro-Wilk test will be conducted.
+```{r, message = FALSE}
+data_thunderstorm <- data_weather[(data_weather$weather_code == 'thunderstorm'),]
+ggplot(data_thunderstorm, aes(cnt)) + geom_histogram(bins = 5) +
+  xlab('Number of Bike Rides per Hour') + ylab('Number of Hours') +
+  ggtitle('Number of Bike Rides for Each Hour of Thunderstorms')
+```
+
+The histogram does not suggest that the sample is strongly nonnormal.
+```{r, message = FALSE}
+shapiro.test(data_thunderstorm$cnt)
+```
+The p-value resulting from the Shapiro-Wilk test is quite high, which means that the sample of observations corresponding to hours of thunderstorms is not significantly nonnormal. Therefore, it can be assumed that the sample is normally distributed. Thus, the assumption of normality has been satisfied.
+
+## Equal Variances
+
+Next, the assumption of equal variance must be checked using Levene's test. If the resulting p-value has a value less than 0.01, then the null hypothesis of equal variances must be rejected.
+```{r, message = FALSE}
+library(car)
+leveneTest(cnt ~ weather_code, data = data_weather)
+```
+Since the resulting p-value is very low, the sample variances of the samples are significantly different from each other. Therefore, the assumption of equal variances has been violated. As a result, the Welch's ANOVA F-test will be used, instead of the Fisher's ANOVA F-test.
+
+## Welch's ANOVA F-test
+
+Now, the ANOVA F-test will be conducted. If the resulting p-value has a value of less than 0.01, that means that the mean number of bike rides per hour for the different types of weather are significantly different from each other, which means that there is an association between type of weather and number of bike rides per hour.
+```{r, message = FALSE}
+oneway.test(cnt ~ weather_code, data = data_weather, var.equal = FALSE)
+```
+Since the p-value is astronomically low, that means that the difference between the mean number of bike rides per hour for the different types of weather are significantly different from each other. Therefore, there is indeed an association between type of weather and number of bike rides per hour.
+
+## Games-Howell Test for Pairwise Differences
+
+To see which pairs of weather types have a significant difference of mean bike rides per hour, a Games-Howell test will be used. Normally, Tukey's HSD test is used, but Tukey's HSD test assumes equality of sample size and variance, so the Games-Howell test will be used instead. Differences will be considered significant if the adjusted p-value is less than 0.01.
+```{r, message = FALSE}
+library(tadaatoolbox)
+tadaa_pairwise_gh(data_weather, cnt, weather_code)[-c(1, 6, 7)]
+```
+As shown above, the pairs of weather types that do NOT have a significant difference in the mean number of bike rides per hour are broken clouds vs. clear weather, cloudy weather vs. rainy weather, cloudy weather vs thunderstorms, rainy weather vs thunderstorms, and snowy weather vs. thunderstorms.
+
+
+
+
+
+
+
+
+
+
+#KEY QUESTION: FORECASTING
+
+
+
+```{r}
+library(forecast)
+library(lubridate)
+library(TSstudio)
+library(astsa)
+
+MyData <- read.csv('/Users/jesusleon/Downloads/london_merged.csv', row.names=1)
+MyData.day <- read.csv('/Users/jesusleon/Downloads/days_2015_2016.csv', row.names=1)
+MyData$TIME <- as_datetime(rownames(MyData[0]))
+#head(MyData)
+#tail(MyData)
+a=as_datetime("2015-01-04 00:00:00")
+MyData$TIME<-as_datetime(rownames(MyData[0]))
+#DataTS<- ts(MyData, as_datetime(rownames(MyData[0])) , frequency = 365)
+
+head(MyData)
+
+library(xts)
+DataTSz <- xts(MyData[,1], order.by=as_datetime(rownames(MyData[0])), frequency = 24)
+DataTS <- xts(MyData[,1], order.by=as_datetime(rownames(MyData[0])), frequency = 365*24)
+DataTS <- ts(DataTS, frequency = 24)
+
+#head(DataTS)
+#tail(MyData )
+#DataTSz
+ts2Start <- MyData$TIME[1]
+ts2End <- MyData$TIME[nrow(MyData)]
+indexPerHour <- seq(ts2Start, ts2End, by = 'hour')
+df.ts <- ts(MyData$cnt, start = c(2015, as.numeric(format(indexPerHour[1], '%j'))), frequency=24)
+df.ts
+head(date_decimal(index(DataTS)),1)
+ts_decompose(DataTS)
+```
+
+```{r}
+require(xts)
+require(forecast)
+
+
+time_index <- seq(from = as.POSIXct("2015-01-04 00:00"), length.out = 17414, by = "hour")
+
+length(time_index) #17544
+length(MyData$cnt)
+MyData$TIME[17414]
+eventdata <- xts(MyData$cnt, order.by = time_index)
+
+```
+
+
+```{r}
+length(DataTS)
+length(df.ts)
+```
+
+```{r}
+library(ggplot2)
+#DataTS<-xts_to_ts(eventdata, frequency = NULL, start = as.POSIXct("2015-01-04 00:00"))
+#DataTS
+
+ts_plot(DataTS,
+           title = "Hourly number of rides booked",
+           Ytitle = "Number of rides booked",
+           Xtitle = "Date by day and hour")   #GGOOD INDDEX
+#DataTS
+#Non dated graph
+#ts object
+ts_plot(DataTS,
+           title = "Hourly number of rides booked",
+           Ytitle = "Number of rides booked",
+           Xtitle = "Date by day and hour")
+
+#DATED GRAPH
+#zoo object
+ts_plot(DataTSz,
+           title = "Hourly number of rides booked",
+           Ytitle = "Number of rides booked",
+           Xtitle = "Date by day and hour")
+
+#MyData$TIME <- as_datetime(rownames(MyData[0]))
+
+```
+
+
+```{r}
+#spliting testing and training data
+USgas_split <- ts_split(DataTS, sample.out = 120)
+   train <- USgas_split$train
+   test <- USgas_split$test
+```
+
+
+```{r}
+#diagnosing acf and pacf
+ts_cor(train, lag.max = 60)
+```
+#Seasonal 24 lag peaks at every time lag of 24
+#Trend indicator: We can confirm the existance of trend since there is a large peak in the pacf at lag 1
+
+
+```{r}
+#removing seasonality
+   DataTS_d12 <- diff(train, 24)
+   ts_plot(DataTS_d12,
+           title = "Hourly number of rides booked - First Seasonal
+   Difference",
+           Ytitle = "Number of rides booked",
+           Xtitle = "Hour")
+
+ts_cor(DataTS_d12, lag.max = 60)
+```
+#ACF displays seasonality now removed
+
+
+```{r}
+#detrending
+DataTS_d12_1 <- diff(diff(DataTS_d12, 1))
+   ts_plot(DataTS_d12_1,
+           title = "Hourly number of rides booked - First Trend
+   Difference",
+           Ytitle = "Number of rides booked",
+           Xtitle = "Hour")
+
+ts_cor(DataTS_d12_1, lag.max = 60)
+```
+ACF is no longer correlated and theres no present trend based on the PACF
+
+#variation nowstable
+
+
+
+
+
+```{r}
+auto.arima(test, d=1, D=1) #diffrenced once to detrend then differenced again to multiple of seasonality 24 to remove sesonality in time series
+#INPUT best model order
+#best_md <- arima(train, order = c(2,1,1) )
+#arima(train, order = c(3,1,1) )
+#arima(train, order = c(3,1,1), seasonal = list(order =c(0,1,0)))
+best_md1 <- arima(train, order = c(3,1,1), seasonal = list(order =c(1,1,0)))  #################
+best_md =sarima(train, p=3, d=1, q=1, P= 0, D =1 , Q =0, S=12, no.constant=TRUE)
+c(best_md$AIC,best_md$AICc,best_md$BIC)
+```
+
+
+```{r}
+m2 =sarima(train, p=3, d=1, q=1, P= 1, D =1 , Q =0, S=12, no.constant=TRUE)
+c(m2$AIC,m2$AICc,m2$BIC)
+#best_md
+```
+#COMPARE two models use best AIC score since we have a large datset
+
+```{r}
+library(forecast)
+#Using trained model to forecast test data
+#input: test data
+#output: forecast
+DataTS_test_fc <- forecast(best_md1, h = 120)
+accuracy(DataTS_test_fc, test)
+```
+
+
+```{r}
+#visualizing forecats with SARIMA
+test_forecast(DataTS,forecast.obj = DataTS_test_fc, test = test)
+```
+
+
+```{r}
+DataTS_fc <- forecast(DataTS_test_fc, h = 24)
+plot_forecast(DataTS_fc,
+                 title = "Number of rides booked - Forecast",
+                 Ytitle = "Number of bookings",
+                 Xtitle = "Hour")
+```
+
+
+
+
